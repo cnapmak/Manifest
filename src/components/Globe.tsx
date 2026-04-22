@@ -543,11 +543,14 @@ export default function Globe(props: GlobeProps) {
 
     // Pointer events — works for mouse, touch, and pen in one path.
     // Left-button / single-finger drag = rotate. Middle-button drag = vertical pan.
-    // Scroll / pinch-equivalent = zoom via wheel.
-    // activePointerId claims the gesture so additional touches don't steal it.
+    // Scroll / two-finger pinch = zoom.
+    // A tap (pointerdown/up in <400ms and <10px of drift) fires country focus
+    // via explicit hit-test, bypassing flaky browser click-synthesis on touch
+    // and giving us a generous finger-friendly target radius.
     let drag: { x: number; y: number; rot: [number, number, number]; spin: number } | null = null;
     let pan: { y: number; panY: number } | null = null;
     let activePointerId: number | null = null;
+    let tapCandidate: { x: number; y: number; t: number } | null = null;
     // For pinch-to-zoom: track secondary pointer for 2-finger gestures.
     const activePointers = new Map<number, { x: number; y: number }>();
     let pinchStartDist = 0;
@@ -561,6 +564,29 @@ export default function Globe(props: GlobeProps) {
       activePointerId = null;
       cancelDrag();
       cancelPan();
+      tapCandidate = null;
+    }
+
+    function handleTap(clientX: number, clientY: number) {
+      const rect = svgEl!.getBoundingClientRect();
+      const px = clientX - rect.left;
+      const py = clientY - rect.top;
+      // Hit-test against visible country dots. Threshold scales with the globe
+      // so it's always a comfortable finger target.
+      const hitR = Math.max(16, radius / 18);
+      let best: { iso: string; dist: number } | null = null;
+      for (const [code, c] of Object.entries(COUNTRIES)) {
+        if (!isFrontFacing(c.coord)) continue;
+        const p = projection(c.coord);
+        if (!p) continue;
+        const d = Math.hypot(p[0] - px, p[1] - py);
+        if (d < hitR && (!best || d < best.dist)) best = { iso: code, dist: d };
+      }
+      if (best) {
+        const cb = propsRef.current.onCountryClick;
+        if (cb) cb(best.iso);
+        else focusCountry(best.iso);
+      }
     }
 
     function onPointerDown(e: PointerEvent) {
@@ -574,6 +600,7 @@ export default function Globe(props: GlobeProps) {
         cancelDrag();
         cancelPan();
         activePointerId = null;
+        tapCandidate = null;
         return;
       }
 
@@ -590,7 +617,7 @@ export default function Globe(props: GlobeProps) {
       drag = { x: e.clientX, y: e.clientY, rot: [...state.rot], spin: state.autoSpin };
       state.autoSpin = 0;
       activePointerId = e.pointerId;
-      try { svgEl!.setPointerCapture(e.pointerId); } catch {}
+      tapCandidate = { x: e.clientX, y: e.clientY, t: performance.now() };
     }
 
     function onPointerMove(e: PointerEvent) {
@@ -622,6 +649,10 @@ export default function Globe(props: GlobeProps) {
       if (!drag) return;
       const dx = e.clientX - drag.x;
       const dy = e.clientY - drag.y;
+      // If the finger has drifted far enough, it's a drag, not a tap.
+      if (tapCandidate && Math.hypot(e.clientX - tapCandidate.x, e.clientY - tapCandidate.y) > 10) {
+        tapCandidate = null;
+      }
       state.rot[0] = drag.rot[0] + dx * 0.4;
       state.rot[1] = Math.max(-85, Math.min(85, drag.rot[1] - dy * 0.3));
       projection.rotate(state.rot);
@@ -634,8 +665,19 @@ export default function Globe(props: GlobeProps) {
       }
       if (e.pointerId !== activePointerId) return;
       activePointerId = null;
-      if (e.button === 1) { cancelPan(); return; }
-      if (pan) { cancelPan(); return; }
+      if (e.button === 1) { cancelPan(); tapCandidate = null; return; }
+      if (pan) { cancelPan(); tapCandidate = null; return; }
+      // Short, stationary pointer sequence → treat as a country tap.
+      if (tapCandidate && performance.now() - tapCandidate.t < 400) {
+        const moved = Math.hypot(e.clientX - tapCandidate.x, e.clientY - tapCandidate.y);
+        if (moved < 10) {
+          cancelDrag(); // restore spin before firing
+          tapCandidate = null;
+          handleTap(e.clientX, e.clientY);
+          return;
+        }
+      }
+      tapCandidate = null;
       cancelDrag();
     }
 
