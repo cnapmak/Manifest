@@ -259,8 +259,12 @@ export default function Globe(props: GlobeProps) {
       const dots = gCountries.selectAll<SVGGElement, [string, Country]>("g.cdot")
         .data(entries, (d) => (d as [string, Country])[0]);
       const dotsEnter = dots.enter().append("g").attr("class", "cdot").attr("cursor", "pointer");
-      dotsEnter.append("circle").attr("class", "cdot-halo").attr("r", 8).attr("fill", "rgba(232,201,122,0.08)");
-      dotsEnter.append("circle").attr("class", "cdot-core").attr("r", 2).attr("fill", "#e8c97a");
+      const haloR = Math.max(4, radius / 42);
+      const coreR = Math.max(1, radius / 170);
+      dotsEnter.append("circle").attr("class", "cdot-halo").attr("r", haloR).attr("fill", "rgba(232,201,122,0.08)");
+      dotsEnter.append("circle").attr("class", "cdot-core").attr("r", coreR).attr("fill", "#e8c97a");
+      gCountries.selectAll<SVGCircleElement, unknown>("circle.cdot-halo").attr("r", haloR);
+      gCountries.selectAll<SVGCircleElement, unknown>("circle.cdot-core").attr("r", coreR);
 
       dotsEnter
         .on("click", (_e, d) => {
@@ -420,13 +424,19 @@ export default function Globe(props: GlobeProps) {
 
       const style = state.arcStyle;
       const showMarkers = style === "glyph" || style === "icon" || style === "both";
+      // Marker size scales with globe radius so on a smaller (mobile) globe
+      // the icons shrink proportionally. At radius ~336 (desktop) → ~12px,
+      // at radius ~168 (mobile) → ~6px.
+      const markerR = Math.max(4, radius / 28);
+      const iconScale = markerR / 18;
+      const iconTranslate = -12 * iconScale;
       const markers = gShipments.selectAll<SVGGElement, { s: Shipment; pt: { xy: [number, number] | null; lonlat: [number, number] } }>("g.ship")
         .data(showMarkers ? flat : [], (d) => String(d.s.id));
       const mEnter = markers.enter().append("g").attr("class", "ship");
-      mEnter.append("circle").attr("r", 10).attr("fill-opacity", 0.95);
+      mEnter.append("circle").attr("fill-opacity", 0.95);
       mEnter.append("text").attr("text-anchor", "middle").attr("dominant-baseline", "central")
-        .attr("font-size", 11).attr("font-weight", 600);
-      mEnter.append("g").attr("class", "icon").attr("transform", "translate(-8,-8) scale(0.667)");
+        .attr("font-weight", 600);
+      mEnter.append("g").attr("class", "icon");
 
       markers.merge(mEnter)
         .attr("transform", (d) => `translate(${d.pt.xy![0]},${d.pt.xy![1]})`)
@@ -437,7 +447,9 @@ export default function Globe(props: GlobeProps) {
           g.select("circle")
             .attr("fill", d.s.comm.color)
             .attr("opacity", op)
-            .attr("r", useIcon ? 12 : 11);
+            .attr("r", useIcon ? markerR : markerR - 1);
+          g.select("text").attr("font-size", Math.max(8, markerR * 0.9));
+          g.select("g.icon").attr("transform", `translate(${iconTranslate},${iconTranslate}) scale(${iconScale})`);
           if (useIcon) {
             g.select("text").text("").attr("opacity", 0);
             const iconG = g.select("g.icon");
@@ -456,12 +468,13 @@ export default function Globe(props: GlobeProps) {
         });
       markers.exit().remove();
 
+      const dotR = Math.max(1.2, radius / 140);
       const dots = gShipments.selectAll<SVGCircleElement, { s: Shipment; pt: { xy: [number, number] | null; lonlat: [number, number] } }>("circle.pdot")
         .data(style === "glyph" || style === "icon" ? [] : flat, (d) => String(d.s.id));
       dots.enter().append("circle").attr("class", "pdot")
         .merge(dots)
         .attr("cx", (d) => d.pt.xy![0]).attr("cy", (d) => d.pt.xy![1])
-        .attr("r", 2.5)
+        .attr("r", dotR)
         .attr("fill", (d) => d.s.comm.color)
         .attr("opacity", (d) => 0.4 + Math.sin(d.s.t * Math.PI) * 0.6);
       dots.exit().remove();
@@ -523,64 +536,120 @@ export default function Globe(props: GlobeProps) {
     }
     rafId = requestAnimationFrame(tick);
 
-    // Left-button drag = rotate. Middle-button drag = vertical pan. Scroll = zoom.
-    // Right-click / contextmenu / blur / missing-button mousemove cancel both
-    // drags cleanly so auto-spin is never swallowed.
+    // Pointer events — works for mouse, touch, and pen in one path.
+    // Left-button / single-finger drag = rotate. Middle-button drag = vertical pan.
+    // Scroll / pinch-equivalent = zoom via wheel.
+    // activePointerId claims the gesture so additional touches don't steal it.
     let drag: { x: number; y: number; rot: [number, number, number]; spin: number } | null = null;
     let pan: { y: number; panY: number } | null = null;
+    let activePointerId: number | null = null;
+    // For pinch-to-zoom: track secondary pointer for 2-finger gestures.
+    const activePointers = new Map<number, { x: number; y: number }>();
+    let pinchStartDist = 0;
+    let pinchStartRadius = 0;
+
     function cancelDrag() {
       if (drag) { state.autoSpin = drag.spin; drag = null; }
     }
     function cancelPan() { pan = null; }
-    function onMouseDown(e: MouseEvent) {
+    function releaseActive() {
+      activePointerId = null;
+      cancelDrag();
+      cancelPan();
+    }
+
+    function onPointerDown(e: PointerEvent) {
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      // Two fingers now down → start pinch zoom, cancel any active drag.
+      if (activePointers.size === 2) {
+        const pts = Array.from(activePointers.values());
+        pinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        pinchStartRadius = radius;
+        cancelDrag();
+        cancelPan();
+        activePointerId = null;
+        return;
+      }
+
+      if (activePointerId !== null) return;
+
       if (e.button === 1) {
-        // Middle-click: vertical pan. Prevent default auto-scroll cursor.
+        // Middle-click (mouse only): vertical pan.
         e.preventDefault();
         pan = { y: e.clientY, panY: state.panY };
+        activePointerId = e.pointerId;
         return;
       }
       if (e.button !== 0) return;
       drag = { x: e.clientX, y: e.clientY, rot: [...state.rot], spin: state.autoSpin };
       state.autoSpin = 0;
+      activePointerId = e.pointerId;
+      try { svgEl!.setPointerCapture(e.pointerId); } catch {}
     }
-    function onMouseMove(e: MouseEvent) {
+
+    function onPointerMove(e: PointerEvent) {
+      if (activePointers.has(e.pointerId)) {
+        activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      }
+
+      // Pinch zoom — two simultaneous pointers
+      if (activePointers.size === 2) {
+        const pts = Array.from(activePointers.values());
+        const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        if (pinchStartDist > 0) {
+          const ratio = dist / pinchStartDist;
+          radius = Math.max(180, Math.min(800, pinchStartRadius * ratio));
+          projection.scale(radius);
+          updateSpatial();
+        }
+        return;
+      }
+
+      if (e.pointerId !== activePointerId) return;
+
       if (pan) {
-        // buttons bitmask: 4 = middle. If middle released outside the window,
-        // release the pan.
-        if ((e.buttons & 4) === 0) { cancelPan(); return; }
         state.panY = pan.panY + (e.clientY - pan.y);
         projection.translate([width / 2, height / 2 + state.panY]);
         updateSpatial();
         return;
       }
       if (!drag) return;
-      if ((e.buttons & 1) === 0) { cancelDrag(); return; }
       const dx = e.clientX - drag.x;
       const dy = e.clientY - drag.y;
       state.rot[0] = drag.rot[0] + dx * 0.4;
       state.rot[1] = Math.max(-85, Math.min(85, drag.rot[1] - dy * 0.3));
       projection.rotate(state.rot);
     }
-    function onMouseUp(e: MouseEvent) {
+
+    function onPointerUp(e: PointerEvent) {
+      activePointers.delete(e.pointerId);
+      if (activePointers.size < 2) {
+        pinchStartDist = 0;
+      }
+      if (e.pointerId !== activePointerId) return;
+      activePointerId = null;
       if (e.button === 1) { cancelPan(); return; }
-      if (e.button !== 0) return;
+      if (pan) { cancelPan(); return; }
       cancelDrag();
     }
-    function onContextMenu() { cancelDrag(); cancelPan(); }
-    function onBlur() { cancelDrag(); cancelPan(); }
+
+    function onContextMenu() { releaseActive(); }
+    function onBlur() { activePointers.clear(); pinchStartDist = 0; releaseActive(); }
     function onWheel(e: WheelEvent) {
       e.preventDefault();
       radius = Math.max(180, Math.min(800, radius + (e.deltaY < 0 ? 25 : -25)));
       projection.scale(radius);
       updateSpatial();
     }
-    svgEl.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+
+    svgEl.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
     svgEl.addEventListener("contextmenu", onContextMenu);
     window.addEventListener("blur", onBlur);
     svgEl.addEventListener("wheel", onWheel, { passive: false });
-    // Middle-click on some browsers opens an auxiliary-click menu; kill that too.
     svgEl.addEventListener("auxclick", (e) => { if ((e as MouseEvent).button === 1) (e as MouseEvent).preventDefault(); });
 
     // Focus animation
@@ -653,9 +722,10 @@ export default function Globe(props: GlobeProps) {
       cancelAnimationFrame(rafId);
       clearInterval(propsPoll as unknown as number);
       ro.disconnect();
-      svgEl.removeEventListener("mousedown", onMouseDown);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
+      svgEl.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
       svgEl.removeEventListener("contextmenu", onContextMenu);
       window.removeEventListener("blur", onBlur);
       svgEl.removeEventListener("wheel", onWheel);
@@ -669,7 +739,7 @@ export default function Globe(props: GlobeProps) {
     <div ref={wrapRef} className={props.className ?? "relative w-full h-full"}>
       <svg
         ref={svgRef}
-        style={{ cursor: "grab", display: "block" }}
+        style={{ cursor: "grab", display: "block", touchAction: "none", userSelect: "none", WebkitUserSelect: "none" }}
         onMouseDown={(e) => { (e.currentTarget.style.cursor = "grabbing"); }}
         onMouseUp={(e) => { (e.currentTarget.style.cursor = "grab"); }}
       />
