@@ -52,12 +52,33 @@ export default function GlobeStage({
   };
 
   return (
-    <div
-      className="relative grid flex-1"
-      style={{ gridTemplateColumns: "300px 1fr", minHeight: "calc(100vh - 56px)" }}
-    >
+    <div className="relative flex-1 flex flex-col md:grid md:grid-cols-[300px_1fr]">
+      {/* Globe — DOM-first so it sits on top on mobile; desktop places it in col 2. */}
+      <div
+        className="order-1 md:order-none md:col-start-2 md:row-start-1 relative flex items-center justify-center overflow-hidden h-[60vh] md:h-[calc(100vh-56px)]"
+      >
+        <Globe
+          focusIso={focusIso}
+          disabledCommodities={Array.from(disabled)}
+          flows={flows}
+          arcStyle={tweaks.arcStyle}
+          theme={tweaks.theme}
+          rotationSpeed={tweaks.rotationSpeed / TWEAK_SCALE}
+          flowSpeedMul={tweaks.flowSpeed / TWEAK_SCALE}
+          density={tweaks.density / TWEAK_SCALE}
+          borderStyle={borderStyle}
+          className="absolute inset-0"
+          onStats={setStats}
+        />
+        <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] mono uppercase tracking-[0.14em] md:tracking-[0.16em] text-[color:var(--ink-faint)] pointer-events-none text-center whitespace-nowrap">
+          <span className="hidden md:inline">drag to rotate · scroll to zoom · click a country</span>
+          <span className="md:hidden">drag · pinch · tap a country</span>
+        </div>
+      </div>
+
+      {/* Sidebar — DOM-second (mobile bottom); desktop places it in col 1. */}
       <aside
-        className="border-r border-[color:var(--line)] p-6 overflow-y-auto space-y-7"
+        className="order-2 md:order-none md:col-start-1 md:row-start-1 border-t md:border-t-0 md:border-r border-[color:var(--line)] p-5 md:p-6 overflow-y-auto space-y-6 md:space-y-7"
         style={{ background: "linear-gradient(to right, rgba(10,14,23,0.6), transparent)" }}
       >
         {children}
@@ -75,24 +96,6 @@ export default function GlobeStage({
           </div>
         </div>
       </aside>
-      <div className="relative flex items-center justify-center overflow-hidden">
-        <Globe
-          focusIso={focusIso}
-          disabledCommodities={Array.from(disabled)}
-          flows={flows}
-          arcStyle={tweaks.arcStyle}
-          theme={tweaks.theme}
-          rotationSpeed={tweaks.rotationSpeed / TWEAK_SCALE}
-          flowSpeedMul={tweaks.flowSpeed / TWEAK_SCALE}
-          density={tweaks.density / TWEAK_SCALE}
-          borderStyle={borderStyle}
-          className="absolute inset-0"
-          onStats={setStats}
-        />
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] mono uppercase tracking-[0.16em] text-[color:var(--ink-faint)] pointer-events-none">
-          drag to rotate · scroll to zoom · click a country
-        </div>
-      </div>
 
       {!tweaksOpen && <TweaksToggle onClick={() => setTweaksOpen(true)} />}
       <TweaksPanel value={tweaks} onChange={setTweaks} open={tweaksOpen} onClose={() => setTweaksOpen(false)} />
