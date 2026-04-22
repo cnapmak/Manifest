@@ -228,19 +228,25 @@ export default function Globe(props: GlobeProps) {
           .attr("fill", "url(#land)")
           .attr("stroke", "none");
       }
+      // Every country's outline — internal borders AND coastlines — picks up
+      // the current border style. In illicit mode all outlines turn red so
+      // island-nations and coastal countries aren't left looking "open".
+      const bs = state.borderStyle;
+      const stroke = bs === "red" ? "#ff3b5c" : bs === "cyan" ? "#26d9d9" : "#ffffff";
+      const borderOpacity = bs === "red" ? 0.95 : bs === "cyan" ? 0.85 : 0.55;
+      const borderWidth = bs === "default" ? 0.5 : 0.9;
+      const coastOpacity = bs === "default" ? 0.7 : borderOpacity;
+      const coastWidth = bs === "default" ? 0.6 : borderWidth;
+
       if (worldBorders) {
         const b = gLand.selectAll<SVGPathElement, MultiLineString>("path.borders").data([worldBorders]);
-        const bs = state.borderStyle;
-        const stroke = bs === "red" ? "#ff3b5c" : bs === "cyan" ? "#26d9d9" : "#ffffff";
-        const opacity = bs === "red" ? 0.95 : bs === "cyan" ? 0.85 : 0.55;
-        const width = bs === "default" ? 0.5 : 0.9;
         b.enter().append("path").attr("class", "borders")
           .merge(b)
           .attr("d", pathGen)
           .attr("fill", "none")
           .attr("stroke", stroke)
-          .attr("stroke-opacity", opacity)
-          .attr("stroke-width", width)
+          .attr("stroke-opacity", borderOpacity)
+          .attr("stroke-width", borderWidth)
           .attr("stroke-linejoin", "round");
       }
       if (worldCoast) {
@@ -249,9 +255,9 @@ export default function Globe(props: GlobeProps) {
           .merge(c)
           .attr("d", pathGen)
           .attr("fill", "none")
-          .attr("stroke", "#ffffff")
-          .attr("stroke-opacity", 0.7)
-          .attr("stroke-width", 0.6)
+          .attr("stroke", stroke)
+          .attr("stroke-opacity", coastOpacity)
+          .attr("stroke-width", coastWidth)
           .attr("stroke-linejoin", "round");
       }
 
