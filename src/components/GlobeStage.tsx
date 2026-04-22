@@ -83,8 +83,8 @@ export default function GlobeStage({
       >
         {children}
         <ModeToggle value={mode} onChange={setMode} />
-        <LegendPanel disabled={disabled as Set<string>} onToggle={toggle} mode={mode} />
         <TopCorridorsPanel mode={mode} />
+        <LegendPanel disabled={disabled as Set<string>} onToggle={toggle} mode={mode} />
         <div className="pt-4 border-t border-[color:var(--line)] space-y-1 text-[11px] text-[color:var(--ink-dim)] mono">
           <div className="flex justify-between">
             <span className="uppercase tracking-[0.12em] text-[10px]">Live shipments</span>

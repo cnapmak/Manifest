@@ -424,10 +424,9 @@ export default function Globe(props: GlobeProps) {
 
       const style = state.arcStyle;
       const showMarkers = style === "glyph" || style === "icon" || style === "both";
-      // Marker size scales with globe radius so on a smaller (mobile) globe
-      // the icons shrink proportionally. At radius ~336 (desktop) → ~12px,
-      // at radius ~168 (mobile) → ~6px.
-      const markerR = Math.max(4, radius / 28);
+      // Marker size scales with globe radius. At radius ~336 (desktop) → ~6px,
+      // at radius ~168 (mobile) → ~3px.
+      const markerR = Math.max(2.5, radius / 56);
       const iconScale = markerR / 18;
       const iconTranslate = -12 * iconScale;
       const markers = gShipments.selectAll<SVGGElement, { s: Shipment; pt: { xy: [number, number] | null; lonlat: [number, number] } }>("g.ship")
@@ -447,8 +446,8 @@ export default function Globe(props: GlobeProps) {
           g.select("circle")
             .attr("fill", d.s.comm.color)
             .attr("opacity", op)
-            .attr("r", useIcon ? markerR : markerR - 1);
-          g.select("text").attr("font-size", Math.max(8, markerR * 0.9));
+            .attr("r", useIcon ? markerR : markerR * 0.9);
+          g.select("text").attr("font-size", Math.max(6, markerR * 0.9));
           g.select("g.icon").attr("transform", `translate(${iconTranslate},${iconTranslate}) scale(${iconScale})`);
           if (useIcon) {
             g.select("text").text("").attr("opacity", 0);
