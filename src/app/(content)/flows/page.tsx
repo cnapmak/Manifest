@@ -48,8 +48,15 @@ export default async function FlowsIndex({
           const b = COUNTRIES[f.to];
           const c = COMMODITIES[f.good];
           if (!a || !b) return null;
+          const conf = (f as { confidence?: "high" | "medium" | "estimate" }).confidence;
+          const confColor =
+            conf === "estimate" ? "#e85a8e" :
+            conf === "medium"   ? "#bfa35a" :
+            conf === "high"     ? "#9bd47a" :
+            "var(--ink-faint)";
+          const confLabel = conf ? conf[0].toUpperCase() : "";
           return (
-            <div key={`${f.from}-${f.to}-${f.good}`} className="grid grid-cols-[1fr_auto] gap-4 items-center py-2.5 px-3 hover:bg-white/5">
+            <div key={`${f.from}-${f.to}-${f.good}`} className="grid grid-cols-[1fr_auto] gap-4 items-center py-2.5 px-3 hover:bg-white/5" title={f.source ?? ""}>
               <div className="flex items-center gap-3 min-w-0 text-[13px]">
                 <span className="w-1.5 h-6 rounded-sm shrink-0" style={{ background: c.color }} />
                 <Link href={`/countries/${f.from.toLowerCase()}`} className="truncate hover:text-[color:var(--accent)]">{a.flag} {a.name}</Link>
@@ -59,7 +66,18 @@ export default async function FlowsIndex({
                   · {c.label}
                 </Link>
               </div>
-              <div className="text-[13px] mono font-semibold">${f.value}B</div>
+              <div className="flex items-center gap-2 shrink-0">
+                {confLabel && (
+                  <span
+                    className="text-[9px] mono uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border"
+                    style={{ color: confColor, borderColor: confColor }}
+                    title={`Confidence: ${conf}`}
+                  >
+                    {confLabel}
+                  </span>
+                )}
+                <div className="text-[13px] mono font-semibold">${f.value}B</div>
+              </div>
             </div>
           );
         })}

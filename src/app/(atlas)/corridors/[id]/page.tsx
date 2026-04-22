@@ -42,11 +42,15 @@ export default async function CorridorPage({ params }: { params: Promise<{ id: s
         <div className="space-y-1">
           {flows.map((f) => {
             const c = COMMODITIES[f.good];
+            const tooltip = [f.source, f.note, f.confidence ? `confidence: ${f.confidence}` : null]
+              .filter(Boolean)
+              .join(" · ");
             return (
               <Link
                 key={`${f.from}-${f.to}-${f.good}`}
                 href={`/commodities/${f.good}`}
                 className="flex items-center justify-between gap-2 text-[11px] hover:text-[color:var(--accent)]"
+                title={tooltip || undefined}
               >
                 <span className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: c.color }} />

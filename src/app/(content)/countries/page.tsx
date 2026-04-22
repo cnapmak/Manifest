@@ -12,7 +12,8 @@ export default function CountriesIndex() {
       <div className="text-[11px] mono uppercase tracking-[0.14em] text-[color:var(--ink-dim)] mb-2">Directory</div>
       <h1 className="text-4xl font-semibold mb-4">Countries</h1>
       <p className="text-[color:var(--ink-dim)] mb-10 max-w-xl">
-        {countries.length} countries tracked. Ranked by annual export value (2025 USD, billions).
+        {countries.length} countries tracked. Ranked by annual goods-export
+        value, USD billions, 2022&ndash;2024 multi-year average.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
