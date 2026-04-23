@@ -19,6 +19,12 @@ export const ILLICIT_COMMODITIES: CommoditySlug[] = [
   "smuggled-electronics",
   "smuggled-arms",
   "illicit-oil",
+  "counterfeits",
+  "human-trafficking",
+  "wildlife",
+  "e-waste",
+  "antiquities",
+  "iff",
 ];
 
 export const CRYPTO_COMMODITIES: CommoditySlug[] = [

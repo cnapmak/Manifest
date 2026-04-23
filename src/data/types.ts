@@ -14,6 +14,12 @@ export type CommoditySlug =
   | "smuggled-electronics"
   | "smuggled-arms"
   | "illicit-oil"
+  | "counterfeits"
+  | "human-trafficking"
+  | "wildlife"
+  | "e-waste"
+  | "antiquities"
+  | "iff"
   // Crypto
   | "stablecoins"
   | "bitcoin"

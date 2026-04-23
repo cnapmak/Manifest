@@ -166,6 +166,12 @@ export const COUNTRIES: Record<ISO2, Country> = {
   BW: { name: "Botswana",      coord: [ 24.7, -22.3], script: "en", flag: "🇧🇼", exports:    7.5 },
   NA: { name: "Namibia",       coord: [ 17.1, -22.0], script: "en", flag: "🇳🇦", exports:    5 },
   SN: { name: "Senegal",       coord: [-14.5,  14.5], script: "fr", flag: "🇸🇳", exports:    5.4 },
+  MR: { name: "Mauritania",    coord: [-10.9,  20.5], script: "ar", flag: "🇲🇷", exports:    3.5 },
+  SL: { name: "Sierra Leone",  coord: [-11.8,   8.5], script: "en", flag: "🇸🇱", exports:    1.2 },
+  GW: { name: "Guinea-Bissau", coord: [-15.2,  11.8], script: "pt", flag: "🇬🇼", exports:    0.25 },
+  TD: { name: "Chad",          coord: [ 18.7,  15.5], script: "fr", flag: "🇹🇩", exports:    3.5 },
+  CF: { name: "CAR",           coord: [ 20.9,   6.6], script: "fr", flag: "🇨🇫", exports:    0.2 },
+  NE: { name: "Niger",         coord: [  8.1,  17.6], script: "fr", flag: "🇳🇪", exports:    1.4 },
   ML: { name: "Mali",          coord: [ -3.9,  17.6], script: "fr", flag: "🇲🇱", exports:    4 },
   BF: { name: "Burkina Faso",  coord: [ -1.7,  12.2], script: "fr", flag: "🇧🇫", exports:    6 },
   GN: { name: "Guinea",        coord: [-10.9,  10.5], script: "fr", flag: "🇬🇳", exports:    9 },
@@ -190,4 +196,11 @@ export const COUNTRIES: Record<ISO2, Country> = {
   // --- South America (extra) ---
   GY: { name: "Guyana",        coord: [-58.9,   6.8], script: "en", flag: "🇬🇾", exports:   15 },
   SR: { name: "Suriname",      coord: [-56.0,   4.1], script: "nl", flag: "🇸🇷", exports:    3 },
+
+  // --- Offshore financial hubs (FSI 2022, Tax Justice Network) ---
+  // Goods exports are negligible; these anchor services/IFF flows.
+  KY: { name: "Cayman Islands",coord: [-81.3,  19.3], script: "en", flag: "🇰🇾", exports:    0.05 },
+  BM: { name: "Bermuda",       coord: [-64.8,  32.3], script: "en", flag: "🇧🇲", exports:    0.03 },
+  VG: { name: "BVI",           coord: [-64.6,  18.4], script: "en", flag: "🇻🇬", exports:    0.03 },
+  GI: { name: "Gibraltar",     coord: [ -5.4,  36.1], script: "en", flag: "🇬🇮", exports:    0.25 },
 };

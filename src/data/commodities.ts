@@ -27,6 +27,18 @@ export const COMMODITIES: Record<CommoditySlug, Commodity> = {
     glyphs: { en: "ARM", zh: "械", ja: "武", ko: "武", ru: "ору", ar: "سلا", es: "ARM", pt: "ARM", fr: "ARM", de: "WAF", it: "ARM", nl: "WAP", hi: "शस", th: "อาวุ", vi: "vũ", tr: "SIL", pl: "BRO", cs: "ZBR", hu: "FEG", sv: "VPN", fi: "ASE", el: "ΟΠ", ro: "ARM", km: "អ", my: "လ", si: "ආ", mn: "ЗЭ", am: "መ", he: "נש", id: "SEN", ms: "SEN", fa: "اس" } },
   "illicit-oil":          { label: "Illicit Oil",          color: "#c08968",
     glyphs: { en: "OIL", ar: "نفط", ru: "нефт", zh: "油", es: "PET", fa: "نف", tr: "PET", ja: "油", ko: "油", de: "ÖL", nl: "OLI", fr: "PÉT", it: "PET", pt: "PET", pl: "ROP", cs: "ROP", hu: "OLA", sv: "OLJ", fi: "ÖLJ", el: "ΠΕ", ro: "PET", hi: "तेल", th: "น้ำ", vi: "dầu", km: "ប", my: "ဓ", si: "තෙ", mn: "Н", am: "ነ", he: "נפ", id: "MY", ms: "MY" } },
+  counterfeits:           { label: "Counterfeits",         color: "#d36fb0",
+    glyphs: { en: "CF", zh: "假", ja: "偽", ko: "偽", ru: "под", ar: "مزي", es: "FAL", pt: "FAL", fr: "CTR", de: "FÄL", it: "CTR", nl: "NAM", tr: "SAH", hi: "नक", th: "ปลอ", vi: "giả", pl: "POD", cs: "PAD", hu: "HAM", sv: "FÖR", fi: "VÄÄ", el: "ΠΛ", ro: "CTR", km: "ក", my: "အ", si: "ව", mn: "Х", am: "ሐ", he: "זי", id: "PAL", ms: "PAL", fa: "تق" } },
+  "human-trafficking":    { label: "Human Trafficking",    color: "#c1322f",
+    glyphs: { en: "HT", zh: "贩", ja: "人", ko: "人", ru: "тор", ar: "اتج", es: "TRT", pt: "TRF", fr: "TRT", de: "MH", it: "TRT", nl: "MH", tr: "İNS", hi: "तस्", th: "ค้า", vi: "buô", pl: "HL", cs: "OB", hu: "EK", sv: "MH", fi: "IH", el: "ΕΜ", ro: "TRT", km: "ជ", my: "လ", si: "මි", mn: "Х", am: "መ", he: "סח", id: "PM", ms: "PM", fa: "قا" } },
+  wildlife:               { label: "Wildlife & Timber",    color: "#4f8a4a",
+    glyphs: { en: "WL", zh: "野", ja: "野", ko: "野", ru: "жив", ar: "بر", es: "FS", pt: "FS", fr: "FS", de: "WT", it: "FS", nl: "WD", tr: "YH", hi: "जी", th: "ป่า", vi: "hoa", pl: "DZ", cs: "ZV", hu: "VA", sv: "VL", fi: "LU", el: "ΑΓ", ro: "FS", km: "ព", my: "တ", si: "වන", mn: "ЗЭ", am: "ዱ", he: "חי", id: "SL", ms: "HL", fa: "و" } },
+  "e-waste":              { label: "E-waste",              color: "#b97238",
+    glyphs: { en: "EW", zh: "废", ja: "廃", ko: "廃", ru: "отх", ar: "نفا", es: "RAE", pt: "REE", fr: "DEE", de: "EAB", it: "RAE", nl: "AEE", tr: "EAT", hi: "कच", th: "ขย", vi: "rác", pl: "ZSE", cs: "OEZ", hu: "EH", sv: "EA", fi: "SER", el: "ΑΗ", ro: "DEE", km: "ស", my: "စ", si: "අප", mn: "ХА", am: "ቆ", he: "פס", id: "SPL", ms: "SPL", fa: "زا" } },
+  antiquities:            { label: "Stolen Antiquities",   color: "#b6986a",
+    glyphs: { en: "AQ", zh: "古", ja: "古", ko: "古", ru: "ант", ar: "آث", es: "ANT", pt: "ANT", fr: "ANT", de: "ANT", it: "ANT", nl: "ANT", tr: "ANT", hi: "पु", th: "โบ", vi: "cổ", pl: "ANT", cs: "ANT", hu: "RÉG", sv: "ANT", fi: "ANT", el: "ΑΡ", ro: "ANT", km: "ប", my: "ရှ", si: "පු", mn: "ЭР", am: "ጥ", he: "עת", id: "KUN", ms: "ART", fa: "بس" } },
+  iff:                    { label: "Illicit Financial Flows", color: "#6f7d8f",
+    glyphs: { en: "IFF", zh: "洗", ja: "資", ko: "資", ru: "фин", ar: "غس", es: "FFI", pt: "FFI", fr: "FFI", de: "IFF", it: "FFI", nl: "IFF", tr: "YAS", hi: "वि", th: "เงิน", vi: "tiền", pl: "IFF", cs: "IFF", hu: "IFF", sv: "IFF", fi: "IFF", el: "ΠΧ", ro: "FFI", km: "$", my: "ငွ", si: "මු", mn: "Б", am: "ገ", he: "הל", id: "IFF", ms: "IFF", fa: "پو" } },
 
   // --- CRYPTO ---
   stablecoins:  { label: "Stablecoins",   color: "#26a17b",
@@ -108,6 +120,35 @@ export const COMMODITY_ICONS: Record<CommoditySlug, string> = {
                    <path d="M12 3 L 12 21 M4 7.5 L 20 16.5 M20 7.5 L 4 16.5"
                          stroke="#0b0c0e" stroke-width="1" opacity="0.5"/>
                    <circle cx="12" cy="12" r="2.5" fill="#0b0c0e" opacity="0.75"/>`,
+  // Counterfeits: shopping tag with circled slash (fake brand)
+  counterfeits: `<path d="M4 4 h8 l8 8 -8 8 -8 -8 z" fill="currentColor" opacity="0.9"/>
+                  <circle cx="8" cy="8" r="1.4" fill="#0b0c0e"/>
+                  <circle cx="14" cy="14" r="3.5" fill="none" stroke="#0b0c0e" stroke-width="1.3"/>
+                  <path d="M11.7 16.3 L 16.3 11.7" stroke="#0b0c0e" stroke-width="1.3" stroke-linecap="round"/>`,
+  // Human trafficking: broken chain link
+  "human-trafficking": `<rect x="3" y="9" width="7" height="6" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+                         <rect x="14" y="9" width="7" height="6" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+                         <path d="M10 12 h1.5 M12.5 12 h1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                         <path d="M5 4 L 8 7 M16 17 L 19 20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.65"/>`,
+  // Wildlife & timber: tusk + leaf
+  wildlife: `<path d="M4 18 C 6 10, 10 6, 18 5 C 17 11, 13 15, 4 18 z" fill="currentColor" opacity="0.92"/>
+              <path d="M18 5 C 15 9, 12 12, 4 18" stroke="#0b0c0e" stroke-width="1" opacity="0.55" fill="none"/>
+              <path d="M11 11 v6" stroke="#0b0c0e" stroke-width="0.9" opacity="0.5"/>`,
+  // E-waste: trashcan with chip
+  "e-waste": `<path d="M5 7 h14 l-1.2 13 a1 1 0 0 1 -1 0.9 h-9.6 a1 1 0 0 1 -1 -0.9 z" fill="currentColor" opacity="0.92"/>
+               <path d="M3 6.5 h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+               <path d="M9 4.5 h6 v2 h-6 z" fill="currentColor"/>
+               <rect x="9" y="11" width="6" height="6" rx="0.5" fill="#0b0c0e" opacity="0.65"/>
+               <path d="M7 12 h2 M7 14 h2 M7 16 h2 M15 12 h2 M15 14 h2 M15 16 h2" stroke="#0b0c0e" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/>`,
+  // Antiquities: amphora vase
+  antiquities: `<path d="M9 3 h6 v2 h1 a2 2 0 0 1 2 2 v2 a4 4 0 0 1 -3 4 v5 a2 2 0 0 1 -2 2 h-4 a2 2 0 0 1 -2 -2 v-5 a4 4 0 0 1 -3 -4 v-2 a2 2 0 0 1 2 -2 h1 z" fill="currentColor" opacity="0.93"/>
+                 <path d="M9 10 h6" stroke="#0b0c0e" stroke-width="0.9" opacity="0.55"/>
+                 <path d="M10 14 h4" stroke="#0b0c0e" stroke-width="0.9" opacity="0.45"/>`,
+  // IFF: stacked banknotes with arrow
+  iff: `<rect x="3" y="8" width="14" height="9" rx="1" fill="currentColor" opacity="0.9"/>
+         <rect x="5" y="6" width="14" height="9" rx="1" fill="currentColor" opacity="0.65"/>
+         <path d="M7 12 h8 M9 10 h4 M9 14 h4" stroke="#0b0c0e" stroke-width="0.9" stroke-linecap="round" opacity="0.75"/>
+         <path d="M18 4 L 22 8 L 18 12 M22 8 h-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
 };
 
 export const THEMES = {
